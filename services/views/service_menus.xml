@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem id="service_menu_root"
+        name="FPG"
+        web_icon="services,static/description/icon.png"
+        sequence="30">
+
+            <menuitem id="menu_service_order"
+                name="Orders"
+                action="action_service_orders"
+                sequence="20"/>
+
+            <menuitem id="menu_equipments"
+                name="Equipments"
+                action="action_equipments"
+                sequence="30"/>
+        </menuitem>
+
+        
+</odoo>

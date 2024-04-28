@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="services_report_invoice_document" inherit_id="account.report_invoice_document">
+        <!-- TODO not the best thing to inherit... -->
+        <xpath expr="//t//div[2]//div[hasclass('page')]//div[@id='informations']" position="after">
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.equipment_name" name="equipment_name">
+                <strong>Equipment Name:</strong><br/>
+                <span t-field="o.equipment_name" ></span>
+            </div>
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.equipment_serial" name="equipment_serial">
+                <strong>Equipment Serial:</strong><br/>
+                <span t-field="o.equipment_serial" ></span>
+            </div>
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.partner_shipping_id" name="partner_shipping_id">
+                <strong> Delivery Address:</strong><br/>
+                <span t-field="o.partner_shipping_id" ></span>
+            </div>
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.customer_complaint" name="customer_complaint">
+                <strong> Customer Complaint:</strong><br/>
+                <span t-field="o.customer_complaint" ></span>
+            </div>
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="complaint_number" name="complaint_number">
+                <strong>Complaint Number:</strong><br/>
+                <span t-field="o.complaint_number" ></span>
+            </div>
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="warranty_number" name="warranty_number">
+                <strong>Warranty Number:</strong><br/>
+                <span t-field="o.warranty_number" ></span>
+            </div>
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="date_damage" name="date_damage">
+                <strong> Date of damage:</strong><br/>
+                <span t-field="o.date_damage" t-options='{"widget": "date"}'></span>
+            </div>
+            <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="pre_payment" name="pre_payment">
+                <strong>Prepayment:</strong><br/>
+                <span t-field="o.pre_payment"></span>
+            </div>
+        </xpath>
+    </template>
+</odoo>

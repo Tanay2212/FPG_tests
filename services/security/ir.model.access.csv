@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+services.access_service_order,access_service_order,services.model_service_order,base.group_user,1,1,1,1
+services.access_service_order_line,access_service_order_line,services.model_service_order_line,base.group_user,1,1,1,1
+services.access_equipment_equipment,access_equipment_equipment,services.model_equipment_equipment,base.group_user,1,1,1,1
+services.access_service_advance_payment_inv,access_service_advance_payment_inv,services.model_service_advance_payment_inv,base.group_user,1,1,1,1
+services.access_service_order_template,access_service_order_template,services.model_service_order_template,base.group_user,1,1,1,1
+services.access_service_order_template_line,access_service_order_template_line,services.model_service_order_template_line,base.group_user,1,1,1,1
+services.access_service_order_template_option,access_service_order_template_option,services.model_service_order_template_option,base.group_user,1,1,1,1
