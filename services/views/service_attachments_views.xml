@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_service_attachment_kanban" model="ir.ui.view">
+        <field name="name">view.service.attachment.kanban</field>
+        <field name="model">service.attachment</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="attachment"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div>
+                            <field name="name" />
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_service_attachment_form" model="ir.ui.view">
+        <field name="name">view.service.attachment.form</field>
+        <field name="model">service.attachment</field>
+        <field name="arch" type="xml">
+            <form string="Service Attachments">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="attachment"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_service_attachment" model="ir.actions.act_window">
+        <field name="name">Service Attachment</field>
+        <field name="res_model">service.attachment</field>
+        <field name="view_mode">kanban,form</field>
+        <!-- <field name="search_view_id" ref="service_order_view_search_inherit"/> -->
+        <!-- <field name="context">{}</field> -->
+        <!-- <field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel'))]</field> -->
+    </record>
+</odoo>
