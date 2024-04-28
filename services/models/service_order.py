@@ -24,7 +24,7 @@ SERVICE_ORDER_STATE = [
 
 class ServiceOrder(models.Model):
     _name = "service.order"
-    _inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin']
+    _inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin', 'utm.mixin']
     _description = "Service Orders"
 
     # Odoo fields Inherited
@@ -64,11 +64,11 @@ class ServiceOrder(models.Model):
     origin = fields.Char(
         string="Source Document",
         help="Reference of the document that generated this Service order request")
-    # prepayment_percent = fields.Float(
-    #     string="Prepayment percentage",
-    #     compute='_compute_prepayment_percent',
-    #     store=True, readonly=False, precompute=True,
-    #     help="The percentage of the amount needed that must be paid by the customer to confirm the order.")
+    prepayment_percent = fields.Float(
+        string="Prepayment percentage",
+        compute='_compute_prepayment_percent',
+        store=True, readonly=False, precompute=True,
+        help="The percentage of the amount needed that must be paid by the customer to confirm the order.")
 
     signature = fields.Image(
         string="Signature",
@@ -153,6 +153,15 @@ class ServiceOrder(models.Model):
         domain=lambda self: "[('groups_id', '=', {}), ('share', '=', False), ('company_ids', '=', company_id)]".format(
             self.env.ref("sales_team.group_sale_salesman").id
         ))
+    team_id = fields.Many2one(
+        comodel_name='crm.team',
+        string="Services Team",
+        compute='_compute_team_id',
+        store=True, readonly=False, precompute=True, ondelete="set null",
+        change_default=True, check_company=True,  # Unrequired company
+        tracking=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+
     client_order_ref = fields.Char(string="Customer Reference", copy=False)
 
     amount_untaxed = fields.Monetary(string="Untaxed Amount", store=True, compute='_compute_amounts', tracking=5)
@@ -208,6 +217,12 @@ class ServiceOrder(models.Model):
         string="Analytic Account",
         copy=False, check_company=True,  # Unrequired company
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    
+    tag_ids = fields.Many2many(
+        comodel_name='crm.tag',
+        relation='service_order_tag_rel', column1='order_id', column2='tag_id',
+        string="Tags")
+
     require_signature = fields.Boolean(
         string="Online signature",
         compute='_compute_require_signature',
@@ -273,7 +288,12 @@ class ServiceOrder(models.Model):
         compute='_compute_require_payment',
         store=True, readonly=False, precompute=True,
         help="Request a online payment from the customer to confirm the order.")
+    # Added fields of UTM. #CodingBanna
     amount_paid = fields.Float(compute='_compute_amount_paid', compute_sudo=True)
+    campaign_id = fields.Many2one(ondelete='set null')
+    medium_id = fields.Many2one(ondelete='set null')
+    source_id = fields.Many2one(ondelete='set null')
+
     reference = fields.Char(
         string="Payment Ref.",
         help="The payment communication of this Service order.",
@@ -528,10 +548,10 @@ class ServiceOrder(models.Model):
             'move_type': 'out_invoice',
             'narration': self.note,
             'currency_id': self.currency_id.id,
-            # 'campaign_id': self.campaign_id.id,
-            # 'medium_id': self.medium_id.id,
-            # 'source_id': self.source_id.id,
-            # 'team_id': self.team_id.id,
+            'campaign_id': self.campaign_id.id,
+            'medium_id': self.medium_id.id,
+            'source_id': self.source_id.id,
+            'team_id': self.team_id.id,
             'partner_id': self.partner_invoice_id.id,
             'partner_shipping_id': self.partner_shipping_id.id,
             'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id._get_fiscal_position(self.partner_invoice_id)).id,
@@ -604,12 +624,21 @@ class ServiceOrder(models.Model):
                 tx.amount for tx in order.transaction_ids if tx.state in ('authorized', 'done')
             )
 
+    @api.depends('service_order_template_id')
+    def _compute_journal_id(self):
+        for order in self.filtered('service_order_template_id'):
+            order.journal_id = order.service_order_template_id.journal_id
     
     @api.depends('company_id')
     def _compute_require_payment(self):
         for order in self:
             order.require_payment = False
-            # order.require_payment = order.company_id.portal_confirmation_pay
+            order.require_payment = order.company_id.portal_confirmation_pay
+
+    @api.depends('require_payment')
+    def _compute_prepayment_percent(self):
+        for order in self:
+            order.prepayment_percent = order.company_id.prepayment_percent
 
     @api.depends('company_id')
     def _compute_validity_date(self):
@@ -637,11 +666,13 @@ class ServiceOrder(models.Model):
             order.require_signature = True
             # order.require_signature = order.company_id.portal_confirmation_sign
 
+    @api.depends("company_id", "company_id.service_order_template_id")
     def _compute_service_order_template_id(self):
         for order in self:
             company_template = order.company_id.service_order_template_id
             if company_template and order.service_order_template_id != company_template:
                 if 'website_id' in self._fields and order.website_id:
+                    order.service_order_template_id = False
                     continue
                 order.service_order_template_id = order.company_id.service_order_template_id.id
 
@@ -815,6 +846,36 @@ class ServiceOrder(models.Model):
                 [('company_id', 'in', (False, order.company_id.id)), ('active', '=', True)],
                 limit=1,
             ))
+
+    @api.depends('partner_id')
+    def _compute_user_id(self):
+        for order in self:
+            if order.partner_id and not (order._origin.id and order.user_id):
+                # Recompute the salesman on partner change
+                #   * if partner is set (is required anyway, so it will be set sooner or later)
+                #   * if the order is not saved or has no salesman already
+                order.user_id = (
+                    order.partner_id.user_id
+                    or order.partner_id.commercial_partner_id.user_id
+                    or self.env.user
+                )
+
+    @api.depends('partner_id', 'user_id')
+    def _compute_team_id(self):
+        cached_teams = {}
+        for order in self:
+            default_team_id = self.env.context.get('default_team_id', False) or order.partner_id.team_id.id or order.team_id.id
+            user_id = order.user_id.id
+            company_id = order.company_id.id
+            key = (default_team_id, user_id, company_id)
+            if key not in cached_teams:
+                cached_teams[key] = self.env['crm.team'].with_context(
+                    default_team_id=default_team_id,
+                )._get_default_team_id(
+                    user_id=user_id,
+                    domain=self.env['crm.team']._check_company_domain(company_id),
+                )
+            order.team_id = cached_teams[key]
 
     def action_view_invoice(self, invoices=False):
         if not invoices:

@@ -19,7 +19,7 @@
                 <field name="partner_id" readonly="1"/>
                 <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                 <!-- <field name="activity_ids" widget="list_activity" optional="show"/> -->
-                <!-- <field name="team_id" optional="hide"/> -->
+                <field name="team_id" optional="hide"/>
                 <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
                 <field name="company_id"
                        groups="base.group_multi_company"
@@ -514,12 +514,12 @@
                         <group>
                             <group name="sales_person" string="Sales">
                                 <field name="user_id" widget="many2one_avatar_user"/>
-                                <!-- <field name="team_id" context="{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}" options="{'no_create': True}"/> -->
+                                <field name="team_id" context="{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}" options="{'no_create': True}"/>
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
-                                <!-- <field name="require_signature"
-                                       readonly="state in ['cancel', 'sale']"/> -->
-                                <!-- <label for="require_payment"/> -->
-                                <!-- <div id="require_payment">
+                                <field name="require_signature"
+                                       readonly="state in ['cancel', 'sale']"/>
+                                <label for="require_payment"/>
+                                <div id="require_payment">
                                     <field name="require_payment"
                                         readonly="state in ['cancel', 'sale']"/>
                                     <span class="mx-3" invisible="not require_payment">of</span>
@@ -528,10 +528,10 @@
                                         invisible="not require_payment"
                                         widget="percentage"
                                         style="width: 3rem"/>
-                                </div> -->
-                                <!-- <field name="reference" readonly="1" invisible="not reference"/> -->
+                                </div>
+                                <field name="reference" readonly="1" invisible="not reference"/>
                                 <field name="client_order_ref"/>
-                                <!-- <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/> -->
+                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                             </group>
                             <group name="service_info" string="Invoicing" invisible="not has_access_so">
                                 <!-- <field name="show_update_fpos" invisible="1"/> -->
@@ -564,9 +564,9 @@
                             </group>
                             <group string="Tracking" name="service_reporting" invisible="not has_access_so">
                                 <field name="origin"/>
-                                <!-- <field name="campaign_id" options="{'create_name_field': 'title'}"/> -->
-                                <!-- <field name="medium_id"/> -->
-                                <!-- <field name="source_id"/> -->
+                                <field name="campaign_id" options="{'create_name_field': 'title'}"/>
+                                <field name="medium_id"/>
+                                <field name="source_id"/>
                             </group>
                             <group name="service_report" string="Service Reports">
                                 <field name="pre_report_pdf" />
@@ -616,6 +616,73 @@
         </field>
     </record>
 
+    <!-- Quotation Tree view. #CodingBanna -->
+    <record id="view_quotation_tree" model="ir.ui.view">
+        <field name="name">service.order.tree.quot</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="services.service_order_tree"/>
+        <field name="mode">primary</field>
+        <field name="priority">4</field>
+        <field name="arch" type="xml">
+            <tree position="attributes">
+                <attribute name="string">Quotations</attribute>
+            </tree>
+            <field name="date_order" position="replace">
+                <field name="create_date" string="Creation Date" widget="date" optional="show"/>
+            </field>
+            <field name="state" position="attributes">
+                <attribute name="optional">show</attribute>
+            </field>
+            <field name="invoice_status" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="amount_to_invoice" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_quotation_tree_with_onboarding" model="ir.ui.view">
+        <field name="name">service.order.tree</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="services.view_quotation_tree"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="banner_route">/onboarding/sale_quotation</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Service Calendar View. #CodingBanna -->
+    <record id="view_service_order_calendar" model="ir.ui.view">
+        <field name="name">service.order.calendar</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <calendar string="Sales Orders" create="0" mode="month" date_start="activity_date_deadline" color="state" event_limit="5" quick_create="0">
+                <field name="currency_id" invisible="1"/>
+                <field name="state" filters="1" invisible="1"/>
+                <field name="activity_ids" options="{'icon': 'fa fa-clock-o'}"/>
+                <field name="partner_id" avatar_field="avatar_128" options="{'icon': 'fa fa-users'}"/>
+                <field name="amount_total" widget="monetary"/>
+                <field name="payment_term_id"/>
+            </calendar>
+        </field>
+    </record>
+
+
+    <!-- Service Pivot View. #CodingBanna -->
+    <record id="view_service_order_pivot" model="ir.ui.view">
+        <field name="name">sale.order.pivot</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Sales Orders" sample="1">
+                <field name="date_order" type="row"/>
+                <field name="amount_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="view_service_order_filter" model="ir.ui.view">
         <field name="name">service.order.list.select</field>
         <field name="model">service.order</field>
@@ -626,7 +693,7 @@
                     filter_domain="['|', ('name', 'ilike', self), ('partner_id', 'child_of', self)]"/>
                 <field name="partner_id" operator="child_of"/>
                 <field name="user_id"/>
-                <!-- <field name="team_id" string="Sales Team"/> -->
+                <field name="team_id" string="Sales Team"/>
                 <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
                 <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                 <!-- We only allow to search on the following sale order line fields (product, name) because the other fields, such as price, quantity, ...
@@ -647,6 +714,96 @@
                     <filter string="Order Date" name="order_month" domain="[]" context="{'group_by': 'date_order'}"/>
                 </group>
             </search>
+        </field>
+    </record>
+
+    <record id="action_orders_upselling" model="ir.actions.act_window">
+        <field name="name">Orders to Upsell</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">tree,form,calendar,graph,pivot,kanban,activity</field>
+        <field name="domain">[('invoice_status','=','upselling')]</field>
+        <field name="context">{'create': False}</field>
+        <field name="search_view_id" ref="view_service_order_filter"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No orders to upsell found.
+            </p><p>
+            An order is to upsell when delivered quantities are above initially
+            ordered quantities, and the invoicing policy is based on ordered quantities.
+            </p><p>
+            As an example, if you sell pre-paid hours of services, Odoo recommends you
+            to sell extra hours when all ordered hours have been consumed.
+            </p>
+        </field>
+    </record>
+
+    <record id="service_order_view_search_inherit_sale" model="ir.ui.view">
+        <field name="name">service.order.search.inherit.sale</field>
+        <field name="model">service.order</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="services.view_service_order_filter"/>
+        <field name="arch" type="xml">
+            <filter name="my_service_orders_filter" position="after">
+                <separator/>
+                <filter string="To Invoice" name="to_invoice" domain="[('invoice_status','=','to invoice')]" />
+                <filter string="To Upsell" name="upselling" domain="[('invoice_status','=','upselling')]" />
+                <separator/>
+                <filter string="Order Date" name="order_date" date="date_order"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="view_service_order_filter" model="ir.ui.view">
+        <field name="name">service.order.list.select</field>
+        <field name="model">service.order</field>
+        <field name="priority" eval="15"/>
+        <field name="arch" type="xml">
+            <search string="Search Service Order">
+                <field name="name" string="Order"
+                    filter_domain="['|', ('name', 'ilike', self), ('partner_id', 'child_of', self)]"/>
+                <field name="partner_id" operator="child_of"/>
+                <field name="user_id"/>
+                <field name="team_id" string="Sales Team"/>
+                <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
+                <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+                <!-- We only allow to search on the following sale order line fields (product, name) because the other fields, such as price, quantity, ...
+                    will not be searched as often, and if they need to be searched it's usually in the context of products
+                    and then they can be searched from the page listing the sale order lines related to a product (from the product itself).
+                -->
+                <filter string="My Orders" domain="[('user_id', '=', uid)]" name="my_service_orders_filter"/>
+                <filter invisible="1" string="Late Activities" name="activities_overdue"
+                    domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                    help="Show all records which has next action date is before today"/>
+                <filter invisible="1" string="Today Activities" name="activities_today"
+                    domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
+                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Salesperson" name="salesperson" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter name="customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Order Date" name="order_month" domain="[]" context="{'group_by': 'date_order'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Quotations Search View. #CodingBanna -->
+    <record id="service_order_view_search_inherit_quotation" model="ir.ui.view">
+        <field name="name">service.order.search.inherit.quotation</field>
+        <field name="model">service.order</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="services.view_service_order_filter"/>
+        <field name="arch" type="xml">
+            <filter name="my_service_orders_filter" position="replace">
+                <field name="campaign_id"/>
+                <separator/>
+                <filter string="My Quotations" name="my_quotation" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Quotations" name="draft" domain="[('state', 'in', ('draft', 'sent'))]"/>
+                <filter string="Service Orders" name="sales" domain="[('state', '=', 'servicer')]"/>
+                <separator/>
+                <filter string="Create Date" name="filter_create_date" date="create_date"/>
+            </filter>
         </field>
     </record>
 
@@ -727,8 +884,81 @@
             </p>
         </field>
     </record> -->
+    <record id="action_quotations" model="ir.actions.act_window">
+        <field name="name">Quotations</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
+        <field name="search_view_id" ref="services.service_order_view_search_inherit_quotation"/>
+        <field name="context">{'search_default_my_quotation': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            Create a new quotation, the first step of a new sale!
+            </p><p>
+            Once the quotation is confirmed by the customer, it becomes a sales order.<br/> You will be able to create an invoice and collect the payment.
+            </p>
+        </field>
+    </record>
 
+    <!-- Service Quotation Calendar view action. #CodingBanna -->
+    <record id="service_order_action_view_quotation_calendar" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="services.view_service_order_calendar"/>
+        <field name="act_window_id" ref="action_quotations"/>
+    </record>
+
+    <!-- Service Order Calendar view action. #CodingBanna -->
+    <record id="service_order_action_view_order_calendar" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="services.view_service_order_calendar"/>
+        <field name="act_window_id" ref="action_service_orders"/>
+    </record>
+
+    <!-- Service Quotation Pivot view action. #CodingBanna -->
+    <record id="service_order_action_view_quotation_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="5"/>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="services.view_service_order_pivot"/>
+        <field name="act_window_id" ref="action_quotations"/>
+    </record>
+
+    
+
+    <record id="action_quotations_with_onboarding" model="ir.actions.act_window">
+        <field name="name">Quotations</field>
+        <field name="res_model">service.order</field>
+        <field name="view_id" ref="services.view_quotation_tree_with_onboarding"/>
+        <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
+        <field name="search_view_id" ref="services.service_order_view_search_inherit_quotation"/>
+        <field name="context">{'search_default_my_quotation': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            Create a new quotation, the first step of a new sale!
+            </p><p>
+            Once the quotation is confirmed by the customer, it becomes a sales order.<br/> You will be able to create an invoice and collect the payment.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_orders_to_invoice" model="ir.actions.act_window">
+        <field name="name">Orders to Invoice</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">tree,form,calendar,graph,pivot,kanban,activity</field>
+        <field name="context">{'create': False}</field>
+        <field name="domain">[('invoice_status','=','to invoice')]</field>
+        <field name="search_view_id" ref="view_service_order_filter"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No orders to invoice found
+            </p><p>
+            You can select all orders and invoice them in batch,<br/>
+            or check every order and invoice them one by one.
+            </p>
+        </field>
+    </record>
     <!-- ACTIONS (SERVER) -->
+
 
     <record id="model_service_order_action_share" model="ir.actions.server">
         <field name="name">Share</field>
