@@ -69,14 +69,36 @@
 
         </menuitem>
 
+        <menuitem id="menu_sale_report"
+            name="Reporting" sequence="40">
+
+            <menuitem id="menu_reporting_services"
+                name="Services"
+                action="action_order_report_all"
+                sequence="10"/>
+            <menuitem id="menu_reporting_servicepeople"
+                name="Servicepersons"
+                action="action_order_report_serviceperson"
+                sequence="20"/>
+            <menuitem id="menu_reporting_product"
+                name="Products"
+                action="action_order_report_products"
+                sequence="30"/>
+            <menuitem id="menu_reporting_customer"
+                name="Customers"
+                action="action_order_report_customers"
+                sequence="40"/>
+
+        </menuitem>
+
         <menuitem id="menu_equipments"
             name="Equipments"
             action="action_equipments"
-            sequence="40"/>
+            sequence="60"/>
 
         <menuitem id="menu_service_config"
             name="Configuration"
-            sequence="50">
+            sequence="70">
 
             <menuitem id="menu_sales_config"
                 sequence="30"

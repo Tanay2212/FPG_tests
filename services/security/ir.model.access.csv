@@ -6,3 +6,4 @@ services.access_service_advance_payment_inv,access_service_advance_payment_inv,s
 services.access_service_order_template,access_service_order_template,services.model_service_order_template,base.group_user,1,1,1,1
 services.access_service_order_template_line,access_service_order_template_line,services.model_service_order_template_line,base.group_user,1,1,1,1
 services.access_service_order_template_option,access_service_order_template_option,services.model_service_order_template_option,base.group_user,1,1,1,1
+services.access_service_report,access_service_report,services.model_service_report,base.group_user,1,1,1,1
