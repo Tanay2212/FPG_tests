@@ -227,11 +227,11 @@
                                             <field
                                                 context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'uom_qty_change':True, 'company_id': parent.company_id}"
                                                 name="product_uom_qty"/>
-                                            <field name="product_uom" invisible="1" groups="!uom.group_uom"/>
+                                            <field name="product_uom" invisible="1" groups="!services.group_uom"/>
                                             <field
                                                 name="product_uom"
                                                 force_save="1"
-                                                groups="uom.group_uom"
+                                                groups="services.group_uom"
                                                 class="oe_no_button"
                                                 required="not display_type"/>
                                         </div>
@@ -243,12 +243,12 @@
                                         <div name="invoiced_qty" invisible="parent.state != 'service'">
                                             <field name="qty_invoiced"/>
                                         </div>
-                                        <!-- <field name="product_packaging_qty" invisible="not product_id or not product_packaging_id" groups="product.group_stock_packaging"/> -->
-                                        <!-- <field name="product_packaging_id" invisible="not product_id" context="{'default_product_id': product_id, 'tree_view_ref':'product.product_packaging_tree_view', 'form_view_ref':'product.product_packaging_form_view'}" groups="product.group_stock_packaging" /> -->
+                                        <field name="product_packaging_qty" invisible="not product_id or not product_packaging_id" groups="services.group_stock_packaging"/>
+                                        <field name="product_packaging_id" invisible="not product_id" context="{'default_product_id': product_id, 'tree_view_ref':'product.product_packaging_tree_view', 'form_view_ref':'product.product_packaging_form_view'}" groups="services.group_stock_packaging" />
                                         <field name="price_unit" invisible="not parent.has_access_so" />
                                         <field name="tax_id" widget="many2many_tags" options="{'no_create': True}" context="{'search_view_ref': 'account.account_tax_view_search'}" domain="[('type_tax_use', '=', 'sale'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id)]"
                                             invisible="not parent.has_access_so" readonly="qty_invoiced &gt; 0"/>
-                                        <t groups="product.group_discount_per_so_line" invisible="not parent.has_access_so">
+                                        <t groups="services.group_discount_per_service_line" invisible="not parent.has_access_so">
                                             <label for="discount"/>
                                             <div name="discount">
                                                 <field name="discount" class="oe_inline"/> %
@@ -292,6 +292,7 @@
                                     <create name="add_product_control" string="Add a product"/>
                                     <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
                                     <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                    <!-- <button name="action_add_from_catalog" string="Catalog" type="object" class="px-4 btn-link" context="{'order_id': parent.id}"/> -->
                                 </control>
 
                                 <field name="sequence" widget="handle" />
@@ -370,22 +371,22 @@
                                     optional="show"/>
                                 <field name="qty_to_invoice" column_invisible="True"/>
                                 <!-- <field name="product_uom_readonly" column_invisible="True"/> -->
-                                <field name="product_uom" column_invisible="True" groups="!uom.group_uom"/>
+                                <field name="product_uom" column_invisible="True" groups="!services.group_uom"/>
                                 <field
                                     name="product_uom"
                                     force_save="1"
                                     string="UoM"
                                     required="not display_type"
                                     context="{'company_id': parent.company_id}"
-                                    groups="uom.group_uom"
+                                    groups="services.group_uom"
                                     options='{"no_open": True}'
                                     optional="show"/>
                                 <field
                                     name="customer_lead"
                                     optional="hide"
                                     readonly="parent.state not in ['draft', 'sent', 'service'] or is_downpayment"/>
-                                <!-- <field name="product_packaging_qty" invisible="not product_id or not product_packaging_id" groups="product.group_stock_packaging" optional="show"/> -->
-                                <!-- <field name="product_packaging_id" invisible="not product_id" context="{'default_product_id': product_id, 'tree_view_ref':'product.product_packaging_tree_view', 'form_view_ref':'product.product_packaging_form_view'}" groups="product.group_stock_packaging" optional="show"/> -->
+                                <field name="product_packaging_qty" invisible="not product_id or not product_packaging_id" groups="services.group_stock_packaging" optional="show"/>
+                                <field name="product_packaging_id" invisible="not product_id" context="{'default_product_id': product_id, 'tree_view_ref':'product.product_packaging_tree_view', 'form_view_ref':'product.product_packaging_form_view'}" groups="services.group_stock_packaging" optional="show"/>
                                 <field
                                     name="price_unit"
                                     readonly="qty_invoiced &gt; 0" column_invisible="not parent.has_access_so"/>
@@ -398,7 +399,7 @@
                                     context="{'active_test': True}"
                                     readonly="qty_invoiced &gt; 0 or is_downpayment"
                                     optional="show"/>
-                                <field name="discount" string="Disc.%" column_invisible="not parent.has_access_so" groups="product.group_discount_per_so_line" optional="show"/>
+                                <field name="discount" string="Disc.%" column_invisible="not parent.has_access_so" groups="services.group_discount_per_service_line" optional="show"/>
                                 <field name="is_downpayment" column_invisible="True"/>
                                 <field name="price_subtotal" string="Tax excl." invisible="is_downpayment" column_invisible="not parent.has_access_so"/>
                                 <field name="price_total"
@@ -432,6 +433,11 @@
                                     <create name="add_product_control" string="Add a product"/>
                                     <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
                                     <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                    <!-- <button name="action_add_from_catalog"
+                                            context="{'order_id': parent.id}"
+                                            string="Catalog"
+                                            type="object"
+                                            class="btn-secondary"/> -->
                                 </control>
                                 <templates>
                                     <t t-name="kanban-box">
@@ -494,11 +500,11 @@
                         </field>
                         <div class="float-end d-flex gap-1 mb-2 ms-1"
                              name="so_button_below_order_lines" invisible="not has_access_so">
-                            <!-- <button string="Discount"
+                            <button string="Discount"
                                     name="action_open_discount_wizard"
                                     type="object"
                                     class="btn btn-secondary"
-                                    groups="product.group_discount_per_so_line"/> -->
+                                    groups="services.group_discount_per_service_line"/>
                         </div>
                         <group name="note_group" col="6" class="mt-2 mt-md-0" invisible="not has_access_so">
                             <group colspan="4">
@@ -616,8 +622,8 @@
         </field>
     </record>
 
-    <!-- Quotation Tree view. #CodingBanna -->
-    <record id="view_quotation_tree" model="ir.ui.view">
+    <!-- Quotation Tree view. -->
+    <!-- <record id="view_quotation_tree" model="ir.ui.view">
         <field name="name">service.order.tree.quot</field>
         <field name="model">service.order</field>
         <field name="inherit_id" ref="services.service_order_tree"/>
@@ -640,9 +646,9 @@
                 <attribute name="column_invisible">1</attribute>
             </field>
         </field>
-    </record>
+    </record> -->
 
-    <record id="view_quotation_tree_with_onboarding" model="ir.ui.view">
+    <!-- <record id="view_quotation_tree_with_onboarding" model="ir.ui.view">
         <field name="name">service.order.tree</field>
         <field name="model">service.order</field>
         <field name="inherit_id" ref="services.view_quotation_tree"/>
@@ -652,9 +658,9 @@
                 <attribute name="banner_route">/onboarding/sale_quotation</attribute>
             </xpath>
         </field>
-    </record>
+    </record> -->
 
-    <!-- Service Calendar View. #CodingBanna -->
+    <!-- Service Calendar View. -->
     <record id="view_service_order_calendar" model="ir.ui.view">
         <field name="name">service.order.calendar</field>
         <field name="model">service.order</field>
@@ -671,7 +677,7 @@
     </record>
 
 
-    <!-- Service Pivot View. #CodingBanna -->
+    <!-- Service Pivot View. -->
     <record id="view_service_order_pivot" model="ir.ui.view">
         <field name="name">sale.order.pivot</field>
         <field name="model">service.order</field>
@@ -787,8 +793,8 @@
         </field>
     </record>
 
-    <!-- Quotations Search View. #CodingBanna -->
-    <record id="service_order_view_search_inherit_quotation" model="ir.ui.view">
+    <!-- Quotations Search View. -->
+    <!-- <record id="service_order_view_search_inherit_quotation" model="ir.ui.view">
         <field name="name">service.order.search.inherit.quotation</field>
         <field name="model">service.order</field>
         <field name="mode">primary</field>
@@ -805,7 +811,7 @@
                 <filter string="Create Date" name="filter_create_date" date="create_date"/>
             </filter>
         </field>
-    </record>
+    </record> -->
 
     <record id="service_order_view_search_inherit" model="ir.ui.view">
         <field name="name">service.order.search.inherit.service</field>
@@ -884,7 +890,7 @@
             </p>
         </field>
     </record> -->
-    <record id="action_quotations" model="ir.actions.act_window">
+   <!--  <record id="action_quotations" model="ir.actions.act_window">
         <field name="name">Quotations</field>
         <field name="res_model">service.order</field>
         <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
@@ -897,17 +903,17 @@
             Once the quotation is confirmed by the customer, it becomes a sales order.<br/> You will be able to create an invoice and collect the payment.
             </p>
         </field>
-    </record>
+    </record> -->
 
-    <!-- Service Quotation Calendar view action. #CodingBanna -->
-    <record id="service_order_action_view_quotation_calendar" model="ir.actions.act_window.view">
+    <!-- Service Quotation Calendar view action. -->
+   <!--  <record id="service_order_action_view_quotation_calendar" model="ir.actions.act_window.view">
         <field name="sequence" eval="4"/>
         <field name="view_mode">calendar</field>
         <field name="view_id" ref="services.view_service_order_calendar"/>
         <field name="act_window_id" ref="action_quotations"/>
-    </record>
+    </record> -->
 
-    <!-- Service Order Calendar view action. #CodingBanna -->
+    <!-- Service Order Calendar view action. -->
     <record id="service_order_action_view_order_calendar" model="ir.actions.act_window.view">
         <field name="sequence" eval="4"/>
         <field name="view_mode">calendar</field>
@@ -915,17 +921,17 @@
         <field name="act_window_id" ref="action_service_orders"/>
     </record>
 
-    <!-- Service Quotation Pivot view action. #CodingBanna -->
-    <record id="service_order_action_view_quotation_pivot" model="ir.actions.act_window.view">
+    <!-- Service Quotation Pivot view action. -->
+   <!--  <record id="service_order_action_view_quotation_pivot" model="ir.actions.act_window.view">
         <field name="sequence" eval="5"/>
         <field name="view_mode">pivot</field>
         <field name="view_id" ref="services.view_service_order_pivot"/>
         <field name="act_window_id" ref="action_quotations"/>
-    </record>
+    </record> -->
 
     
 
-    <record id="action_quotations_with_onboarding" model="ir.actions.act_window">
+   <!--  <record id="action_quotations_with_onboarding" model="ir.actions.act_window">
         <field name="name">Quotations</field>
         <field name="res_model">service.order</field>
         <field name="view_id" ref="services.view_quotation_tree_with_onboarding"/>
@@ -938,8 +944,8 @@
             </p><p>
             Once the quotation is confirmed by the customer, it becomes a sales order.<br/> You will be able to create an invoice and collect the payment.
             </p>
-        </field>
-    </record>
+        </field> -->
+    <!-- </record> -->
 
     <record id="action_orders_to_invoice" model="ir.actions.act_window">
         <field name="name">Orders to Invoice</field>

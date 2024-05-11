@@ -7,3 +7,4 @@ services.access_service_order_template,access_service_order_template,services.mo
 services.access_service_order_template_line,access_service_order_template_line,services.model_service_order_template_line,base.group_user,1,1,1,1
 services.access_service_order_template_option,access_service_order_template_option,services.model_service_order_template_option,base.group_user,1,1,1,1
 services.access_service_report,access_service_report,services.model_service_report,base.group_user,1,1,1,1
+services.access_service_order_discount,access_service_order_discount,services.model_service_order_discount,base.group_user,1,1,1,1

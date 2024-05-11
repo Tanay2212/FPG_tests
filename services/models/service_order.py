@@ -288,7 +288,7 @@ class ServiceOrder(models.Model):
         compute='_compute_require_payment',
         store=True, readonly=False, precompute=True,
         help="Request a online payment from the customer to confirm the order.")
-    # Added fields of UTM. #CodingBanna
+    # Added fields of UTM.
     amount_paid = fields.Float(compute='_compute_amount_paid', compute_sudo=True)
     campaign_id = fields.Many2one(ondelete='set null')
     medium_id = fields.Many2one(ondelete='set null')
@@ -354,7 +354,17 @@ class ServiceOrder(models.Model):
 
     def _get_invoice_grouping_keys(self):
         return ['company_id', 'partner_id', 'currency_id']
-
+    
+    def action_open_discount_wizard(self):
+        self.ensure_one()
+        return {
+            'name': _("Discount"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'service.order.discount',
+            'view_mode': 'form',
+            'target': 'new',
+        }
+    
     def _create_invoices(self, grouped=False, final=False, date=None):
         if not self.env['account.move'].check_access_rights('create', False):
             try:

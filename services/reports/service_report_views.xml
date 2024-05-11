@@ -110,9 +110,9 @@
                     <filter string="Status" name="status" context="{'group_by':'state'}"/>
                     <filter string="Company" name="company" groups="base.group_multi_company" context="{'group_by':'company_id'}"/>
                     <separator/>
-                    <!-- Commented 'invisible="context.get('sale_report_view_hide_date')"'. #CodingBanna -->
+                    <!-- Commented 'invisible="context.get('sale_report_view_hide_date')"'. -->
                     <filter string="Order Date" name="date" context="{'group_by':'date'}" />
-                    <!-- Commented 'invisible="context.get('sale_report_view_hide_date')"'. #CodingBanna -->
+                    <!-- Commented 'invisible="context.get('sale_report_view_hide_date')"'. -->
                     <filter string="Order Date" name="group_by_date_day" context="{'group_by':'date:day'}" />
                 </group>
             </search>

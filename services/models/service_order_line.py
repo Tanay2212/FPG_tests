@@ -200,6 +200,44 @@ class ServiceOrderLine(models.Model):
         compute='_compute_untaxed_amount_to_invoice',
         store=True)
     
+    product_packaging_qty = fields.Float(
+        string="Packaging Quantity",
+        compute='_compute_product_packaging_qty',
+        store=True, readonly=False, precompute=True)
+    
+    product_packaging_id = fields.Many2one(
+        comodel_name='product.packaging',
+        string="Packaging",
+        compute='_compute_product_packaging_id',
+        store=True, readonly=False, precompute=True,
+        domain="[('sales', '=', True), ('product_id','=',product_id)]",
+        check_company=True)
+    
+    @api.depends('product_packaging_id', 'product_uom', 'product_uom_qty')
+    def _compute_product_packaging_qty(self):
+        self.product_packaging_qty = 0
+        for line in self:
+            if not line.product_packaging_id:
+                continue
+            line.product_packaging_qty = line.product_packaging_id._compute_qty(line.product_uom_qty, line.product_uom)
+
+    @api.depends('product_id', 'product_uom_qty', 'product_uom')
+    def _compute_product_packaging_id(self):
+        for line in self:
+            # remove packaging if not match the product
+            if line.product_packaging_id.product_id != line.product_id:
+                line.product_packaging_id = False
+            # suggest biggest suitable packaging matching the SO's company
+            if line.product_id and line.product_uom_qty and line.product_uom:
+                suggested_packaging = line.product_id.packaging_ids\
+                        .filtered(lambda p: p.sales and (p.product_id.company_id <= p.company_id <= line.company_id))\
+                        ._find_suitable_product_packaging(line.product_uom_qty, line.product_uom)
+                line.product_packaging_id = suggested_packaging or line.product_packaging_id
+
+    def action_add_from_catalog(self):
+        order = self.env['service.order'].browse(self.env.context.get('order_id'))
+        return order.action_add_from_catalog()
+    
     @api.depends('state', 'product_uom_qty', 'qty_delivered', 'qty_to_invoice', 'qty_invoiced')
     def _compute_invoice_status(self):
         """

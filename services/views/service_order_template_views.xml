@@ -29,7 +29,7 @@
                         </h1>
                     </div>
                     <group>
-                        <group name="sale_info">
+                        <group name="service_info">
                             <field name="active" invisible="1"/>
                             <label for="number_of_days" string="Quotation Validity"/>
                             <div id="number_of_days">
@@ -102,7 +102,7 @@
                                 <field name="product_uom_category_id" column_invisible="True"/>
                                 <field
                                     name="product_uom_id"
-                                    groups="uom.group_uom"
+                                    groups="services.group_uom"
                                     required="not display_type"/>
                             </tree>
                         </field>
@@ -114,14 +114,14 @@
                             <field name="name"/>
                             <field name="quantity"/>
                             <field name="product_uom_category_id" column_invisible="True"/>
-                            <field name="uom_id" groups="uom.group_uom"/>
+                            <field name="uom_id" groups="services.group_uom"/>
                             <field name="company_id" column_invisible="True"/>
                           </tree>
                         </field>
                     </page>
                         <page string="Terms &amp; Conditions" name="terms_and_conditions">
                             <field name="note" nolabel="1"
-                                   placeholder="The Administrator can set default Terms &amp; Conditions in Sales Settings. Terms set here will show up instead if you select this quotation template."/>
+                                   placeholder="The Administrator can set default Terms &amp; Conditions in Services Settings. Terms set here will show up instead if you select this quotation template."/>
                         </page>
                     </notebook>
                 </sheet>
@@ -141,16 +141,16 @@
     </record>
 
     <record id="service_order_template_action" model="ir.actions.act_window">
-        <field name="name">Quotation Templates</field>
+        <field name="name">Order Templates</field>
         <field name="res_model">service.order.template</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create your quotation template
+                Create your order template
             </p><p>
                 Use templates to create polished, professional quotes in minutes.
                 Send these quotes by email and let your customers sign online.
-                Use cross-selling and discounts to push and boost your sales.
+                Use cross-selling and discounts to push and boost your services.
             </p>
         </field>
     </record>
